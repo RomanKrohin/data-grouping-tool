@@ -12,7 +12,7 @@ public class Main {
 
         String inputFilePath = args[0];
 
-        // Чтение CSV файла
+        // Чтение файла
         Reader csvReader = new Reader(inputFilePath);
         List<String[]> rows = csvReader.readCsvFile();
 

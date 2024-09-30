@@ -9,7 +9,7 @@ public class Reader {
         this.filePath = filePath;
     }
 
-    // Метод для чтения CSV файла
+    // Метод для чтения файла
     public List<String[]> readCsvFile() throws IOException {
         List<String[]> rows = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
@@ -21,7 +21,7 @@ public class Reader {
         return rows;
     }
 
-    // Парсинг строки CSV с учетом кавычек
+    // Парсинг строки с учетом кавычек
     private String[] parseCsvLine(String line) {
         return line.split(";(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
     }
