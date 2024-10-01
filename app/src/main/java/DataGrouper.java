@@ -2,37 +2,36 @@ import java.util.*;
 
 public class DataGrouper {
 
-    // Группировка данных по значениям столбцов
-    public Map<Integer, Map<String, List<String[]>>> groupByColumns(List<String[]> rows) {
-        Map<Integer, Map<String, List<String[]>>> groupedData = new HashMap<>();
+    // Храним только количество появлений значений для каждой колонки
+    private final Map<Integer, Map<String, Integer>> groupedData = new HashMap<>();
 
-        for (String[] row : rows) {
-            for (int col = 0; col < row.length; col++) {
-                String value = row[col];
-                groupedData
-                        .computeIfAbsent(col, k -> new HashMap<>())
-                        .computeIfAbsent(value, k -> new ArrayList<>())
-                        .add(row);
-            }
+    // Группировка одной строки по значениям столбцов
+    public void groupRow(String[] row) {
+        for (int col = 0; col < row.length; col++) {
+            String value = row[col];
+            // Используем computeIfAbsent для создания структуры данных только при необходимости
+            groupedData.computeIfAbsent(col, k -> new HashMap<>())
+                .merge(value, 1, Integer::sum); // Увеличиваем счетчик для текущего значения
         }
-        return groupedData;
     }
 
-    // Печать сгруппированных данных
-    public void printGroupedData(Map<Integer, Map<String, List<String[]>>> groupedData) {
-        for (Map.Entry<Integer, Map<String, List<String[]>>> columnGroup : groupedData.entrySet()) {
+    // Печать сгруппированных данных и возврат количества групп с более чем одним элементом
+    public int printGroupedData() {
+        int groupCount = 0;
+
+        for (Map.Entry<Integer, Map<String, Integer>> columnGroup : groupedData.entrySet()) {
             int colIndex = columnGroup.getKey();
             System.out.println("Column " + colIndex + ":");
-            for (Map.Entry<String, List<String[]>> valueGroup : columnGroup.getValue().entrySet()) {
-                List<String[]> group = valueGroup.getValue();
-                if (group.size() > 1) {
+            for (Map.Entry<String, Integer> valueGroup : columnGroup.getValue().entrySet()) {
+                int count = valueGroup.getValue();
+                if (count > 1) {
+                    groupCount++;
                     String value = valueGroup.getKey();
-                    System.out.println("  Value: " + (value.isEmpty() ? "\"\"" : value));
-                    for (String[] row : group) {
-                        System.out.println("    " + Arrays.toString(row));
-                    }
+                    System.out.println("  Value: " + (value.isEmpty() ? "\"\"" : value) + " (Count: " + count + ")");
                 }
             }
         }
+
+        return groupCount; // Возвращаем количество групп с более чем одним элементом
     }
 }

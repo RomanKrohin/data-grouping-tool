@@ -1,6 +1,7 @@
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 public class Main {
 
@@ -12,19 +13,25 @@ public class Main {
 
         String inputFilePath = args[0];
 
-        // Чтение файла
-        Reader csvReader = new Reader(inputFilePath);
-        List<String[]> rows = csvReader.readCsvFile();
+        long startTime = System.nanoTime();
 
-        // Фильтрация некорректных строк
-        DataFilter dataFilter = new DataFilter();
-        List<String[]> validRows = dataFilter.filterInvalidRows(rows);
-
-        // Группировка данных по значениям столбцов
+        // Инициализация считывателя
+        Reader reader = new Reader();
         DataGrouper dataGrouper = new DataGrouper();
-        Map<Integer, Map<String, List<String[]>>> groupedData = dataGrouper.groupByColumns(validRows);
 
-        // Печать сгруппированных данных
-        dataGrouper.printGroupedData(groupedData);
+        // Используем поток для обработки данных
+        try (Stream<String> lines = Files.lines(Paths.get(inputFilePath))) {
+            lines.forEach(line -> {
+                String[] row = reader.parseLine(line);
+                dataGrouper.groupRow(row);
+            });
+        }
+
+        int groupCount = dataGrouper.printGroupedData();
+        long endTime = System.nanoTime();
+
+        long duration = (endTime - startTime) / 1_000_000;
+        System.out.println("Number of groups with more than one element: " + groupCount);
+        System.out.println("Execution time: " + duration + " ms");
     }
 }
